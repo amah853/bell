@@ -8,11 +8,13 @@ import * as Halloween from './themes/Halloween'
 import * as Jonathan from './themes/Jonathan'
 import { dark as PastelDark, light as PastelLight } from './themes/Pastel'
 import { dark as RainbowDark, light as RainbowLight } from './themes/Rainbow'
+import * as Valentines from './themes/Valentines'
 import * as Winter from './themes/Winter'
 
 const themes: ITheme[] = [
   Winter,
   Halloween,
+  Valentines,
   DefaultLight,
   DefaultDark,
   GradientLight,
@@ -44,6 +46,14 @@ export default class ThemeManager {
     }
   }
 
+  private isDebugMode (): boolean {
+    // add a debug parameter so that developers can test seasonal themes (amah853)
+    if (typeof window === 'undefined') return false
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    const urlParams = new URLSearchParams(window.location.search)
+    return isLocalhost && urlParams.get('mode') === 'debug'
+  }
+
   get defaultTheme (): ITheme {
     // The first available theme in the array is the default
     for (const theme of themes) {
@@ -72,6 +82,7 @@ export default class ThemeManager {
   }
 
   public isAvailable (themeName: string): boolean {
+    if (this.isDebugMode()) return true // show all themes if in debug
     return !this.themes[themeName].enabled
       || this.themes[themeName].enabled!(this.secrets)
   }
