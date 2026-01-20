@@ -7,6 +7,7 @@ const notificationManager = require('../NotificationManager').default
 const soundManager = require('../SoundManager').default
 const ThemeManager = require('../ThemeManager').default
 const themeManager = new ThemeManager()
+const scheduleOverrideManager = require('../ScheduleOverrideManager').default
 const { Select } = require('mithril-selector')
 
 function containsCurrentSource (sources, currentSource) {
@@ -32,6 +33,22 @@ const Settings = {
         display: currentSchool.name,
         value: sourceManager.source
       })
+    }
+
+    // Load available schedules for override
+    try {
+      const source = sourceManager.source
+      const data = await requestManager.get(`/api/data/${source}`)
+      vnode.state.availableSchedules = Object.keys(data.schedules || {}).map(name => ({
+        display: data.schedules[name].display || name,
+        value: name
+      }))
+      
+      // Check if there's an override for today
+      const override = scheduleOverrideManager.getTodayOverride()
+      vnode.state.currentOverride = override ? override.scheduleName : null
+    } catch (e) {
+      vnode.state.availableSchedules = []
     }
   },
   onupdate: function (vnode) {
@@ -71,6 +88,30 @@ const Settings = {
           options: themeManager.availableThemes,
           onselect: theme => cookieManager.set('theme', theme)
         }),
+        // Schedule override selector
+        (vnode.state.availableSchedules && vnode.state.availableSchedules.length > 0) ? [
+          m('.desc', [
+            'Override Today\'s Schedule (Local Only)',
+            m('br'),
+            m('small', 'Temporarily use a different schedule for today only (only on your machine)')
+          ]),
+          m(Select, {
+            value: vnode.state.currentOverride || '',
+            options: [{ display: 'Use Default Schedule', value: '' }].concat(vnode.state.availableSchedules),
+            onselect: async (scheduleName) => {
+              if (scheduleName) {
+                await scheduleOverrideManager.setOverrideForToday(scheduleName)
+                vnode.state.currentOverride = scheduleName
+              } else {
+                await scheduleOverrideManager.clearOverrideForToday()
+                vnode.state.currentOverride = null
+              }
+              m.redraw()
+              // Reload the page to apply the override
+              window.location.reload()
+            }
+          })
+        ] : null,
         m('.add-link', (vnode.state.editClasses) ? null : m('a.add#edit-classes-button[href=/periods]', {
           oncreate: m.route.link
         }, 'Edit Period Names')),
