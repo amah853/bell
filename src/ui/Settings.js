@@ -8,6 +8,7 @@ const soundManager = require('../SoundManager').default
 const ThemeManager = require('../ThemeManager').default
 const themeManager = new ThemeManager()
 const scheduleOverrideManager = require('../ScheduleOverrideManager').default
+const parseSchedules = require('../ScheduleParser').default
 const { Select } = require('mithril-selector')
 
 function containsCurrentSource (sources, currentSource) {
@@ -39,10 +40,14 @@ const Settings = {
     try {
       const source = sourceManager.source
       const data = await requestManager.get(`/api/data/${source}`)
-      vnode.state.availableSchedules = Object.keys(data.schedules || {}).map(name => ({
-        display: data.schedules[name].display || name,
-        value: name
-      }))
+      const parsedSchedules = parseSchedules(data.schedules)
+      vnode.state.availableSchedules = Object.keys(parsedSchedules)
+        .filter(name => parsedSchedules[name].periods.length > 0) // Filter out empty schedules like weekend/holiday
+        .map(name => ({
+          display: parsedSchedules[name].display || name,
+          value: name
+        }))
+        .sort((a, b) => a.display.localeCompare(b.display))
       
       // Check if there's an override for today
       const override = scheduleOverrideManager.getTodayOverride()
@@ -97,7 +102,7 @@ const Settings = {
           ]),
           m(Select, {
             value: vnode.state.currentOverride || '',
-            options: [{ display: 'Use Default Schedule', value: '' }].concat(vnode.state.availableSchedules),
+            options: [{ display: '-- Use Default Schedule --', value: '' }].concat(vnode.state.availableSchedules),
             onselect: async (scheduleName) => {
               if (scheduleName) {
                 await scheduleOverrideManager.setOverrideForToday(scheduleName)
