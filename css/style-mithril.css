@@ -700,3 +700,162 @@ checkbox css is modified from https://kyusuf.com/post/completely-css-custom-chec
     opacity: 1;
     z-index: 2;
 }
+
+/* Error Page Styles */
+.error-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2em;
+    text-align: center;
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.error-icon {
+    font-size: 8em;
+    background: linear-gradient(135deg, #ff6b6b 0%, #eb693e 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.3em;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.05);
+    }
+}
+
+.error-content {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.error-title {
+    font-size: 8em;
+    font-weight: bold;
+    color: #333;
+    margin: 0;
+    line-height: 1;
+    background: linear-gradient(135deg, #ff6b6b 0%, #eb693e 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.error-heading {
+    font-size: 2.5em;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 0.5em 0 0.3em 0;
+}
+
+.error-description {
+    font-size: 1.2em;
+    color: #7f8c8d;
+    margin: 0 0 2em 0;
+    line-height: 1.6;
+}
+
+.error-actions {
+    display: flex;
+    gap: 1em;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.error-button {
+    display: inline-block;
+    padding: 1em 2.5em;
+    font-size: 1.1em;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.error-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.error-button:active {
+    transform: translateY(0);
+}
+
+.error-button.primary {
+    background: linear-gradient(135deg, #ff6b6b 0%, #eb693e 100%);
+    color: white;
+}
+
+.error-button.primary:hover {
+    background: linear-gradient(135deg, #ff6b6b 0%, #eb693e 100%);
+}
+
+.error-button.secondary {
+    background: white;
+    color: #ff6b6b;
+    border: 2px solid #ff6b6b;
+}
+
+.error-button.secondary:hover {
+    background: #ff6b6b;
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .error-page {
+        padding: 1em;
+    }
+    
+    .error-icon {
+        font-size: 5em;
+    }
+    
+    .error-title {
+        font-size: 5em;
+    }
+    
+    .error-heading {
+        font-size: 1.8em;
+    }
+    
+    .error-description {
+        font-size: 1em;
+    }
+    
+    .error-button {
+        padding: 0.8em 2em;
+        font-size: 1em;
+    }
+    
+    .error-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .error-button {
+        width: 100%;
+    }
+}

@@ -61,9 +61,21 @@ const Index = {
       await analyticsManager.reportAnalytics()
     } catch (e) {
       await sourceManager.clearSource()
-      vnode.attrs.error = [m('span', 'School not found'), m('br'), m('a[href=/settings]', {
-        oncreate: m.route.link
-      }, 'Try another')]
+      vnode.attrs.error = [
+        m('.error-title', '404'),
+        m('.error-heading', 'Page Not Found'),
+        m('.error-description', 'Oof, looks like this page skipped class.'),
+        m('.error-description', 'The page you are looking for does not exist or has been moved. If you expected something to be here, contact us at hello@bell.plus'),
+        m('.error-actions', [
+          m('a.error-button.primary[href=/settings]', {
+            oncreate: m.route.link
+          }, 'Browse Schools'),
+          m('a.error-button.secondary[href=/]', {
+            oncreate: m.route.link,
+            onclick: () => sourceManager.clearSource()
+          }, 'Go Home')
+        ])
+      ]
     }
   },
   view: function (vnode) {
