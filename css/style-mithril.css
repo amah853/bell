@@ -701,7 +701,7 @@ checkbox css is modified from https://kyusuf.com/post/completely-css-custom-chec
     z-index: 2;
 }
 
-/* Error Page Styles */
+/* Error Page */
 .error-page {
     display: flex;
     flex-direction: column;
@@ -716,34 +716,20 @@ checkbox css is modified from https://kyusuf.com/post/completely-css-custom-chec
 @keyframes fadeIn {
     from {
         opacity: 0;
-        transform: translateY(-20px);
     }
     to {
         opacity: 1;
-        transform: translateY(0);
     }
 }
 
 .error-icon {
     font-size: 8em;
-    background: linear-gradient(135deg, #ff6b6b 0%, #eb693e 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: darkturquoise;
     margin-bottom: 0.3em;
-    animation: pulse 2s ease-in-out infinite;
+    opacity: 0.3;
 }
 
-@keyframes pulse {
-    0%, 100% {
-        opacity: 1;
-        transform: scale(1);
-    }
-    50% {
-        opacity: 0.8;
-        transform: scale(1.05);
-    }
-}
+
 
 .error-content {
     max-width: 600px;
@@ -752,26 +738,23 @@ checkbox css is modified from https://kyusuf.com/post/completely-css-custom-chec
 
 .error-title {
     font-size: 8em;
-    font-weight: bold;
-    color: #333;
+    font-weight: 300;
+    color: #555;
     margin: 0;
     line-height: 1;
-    background: linear-gradient(135deg, #ff6b6b 0%, #eb693e 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    opacity: 0.3;
 }
 
 .error-heading {
-    font-size: 2.5em;
-    font-weight: 600;
-    color: #2c3e50;
-    margin: 0.5em 0 0.3em 0;
+    font-size: 2em;
+    font-weight: 400;
+    color: #555;
+    margin: 0.5em 0 0.5em 0;
 }
 
 .error-description {
-    font-size: 1.2em;
-    color: #7f8c8d;
+    font-size: 1em;
+    color: #999;
     margin: 0 0 2em 0;
     line-height: 1.6;
 }
@@ -785,43 +768,40 @@ checkbox css is modified from https://kyusuf.com/post/completely-css-custom-chec
 
 .error-button {
     display: inline-block;
-    padding: 1em 2.5em;
-    font-size: 1.1em;
-    font-weight: 600;
+    padding: 10px 20px;
+    font-size: 1em;
+    font-weight: 400;
     text-decoration: none;
-    border-radius: 50px;
+    border-radius: 0;
     transition: all 0.3s ease;
     cursor: pointer;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border: 1px solid #ddd;
+    background: white;
 }
 
 .error-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-}
-
-.error-button:active {
-    transform: translateY(0);
+    border-color: darkturquoise;
 }
 
 .error-button.primary {
-    background: linear-gradient(135deg, #ff6b6b 0%, #eb693e 100%);
+    background: darkturquoise;
     color: white;
+    border-color: darkturquoise;
 }
 
 .error-button.primary:hover {
-    background: linear-gradient(135deg, #ff6b6b 0%, #eb693e 100%);
+    opacity: 0.9;
 }
 
 .error-button.secondary {
     background: white;
-    color: #ff6b6b;
-    border: 2px solid #ff6b6b;
+    color: #555;
+    border: 1px solid #ddd;
 }
 
 .error-button.secondary:hover {
-    background: #ff6b6b;
-    color: white;
+    border-color: darkturquoise;
+    color: darkturquoise;
 }
 
 @media (max-width: 768px) {

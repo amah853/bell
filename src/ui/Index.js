@@ -63,9 +63,8 @@ const Index = {
       await sourceManager.clearSource()
       vnode.attrs.error = [
         m('.error-title', '404'),
-        m('.error-heading', 'Page Not Found'),
-        m('.error-description', 'Oof, looks like this page skipped class.'),
-        m('.error-description', 'The page you are looking for does not exist or has been moved. If you expected something to be here, contact us at hello@bell.plus'),
+        m('.error-heading', 'School Not Found'),
+        m('.error-description', 'We couldn\'t find a schedule for this school. It might have been moved or doesn\'t exist.'),
         m('.error-actions', [
           m('a.error-button.primary[href=/settings]', {
             oncreate: m.route.link
