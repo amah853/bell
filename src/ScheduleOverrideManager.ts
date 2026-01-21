@@ -11,9 +11,10 @@ class ScheduleOverrideManager {
   
   private cache: IScheduleOverride[] = []
   private cacheLoaded: boolean = false
+  private cacheLoadPromise: Promise<void>
 
   constructor() {
-    this.loadCache()
+    this.cacheLoadPromise = this.loadCache()
   }
 
   private async loadCache(): Promise<void> {
@@ -23,11 +24,18 @@ class ScheduleOverrideManager {
     await this.cleanupOldOverrides()
   }
 
+  private async ensureCacheLoaded(): Promise<void> {
+    if (!this.cacheLoaded) {
+      await this.cacheLoadPromise
+    }
+  }
+
   private async saveCache(): Promise<void> {
     await cookieManager.set('schedule_overrides', this.cache)
   }
 
   public async setOverrideForToday (scheduleName: string, display: string | null = null): Promise<void> {
+    await this.ensureCacheLoaded()
     const today = Calendar.dateToString(new Date())
     
     // Remove any existing override for today
@@ -44,13 +52,18 @@ class ScheduleOverrideManager {
   }
 
   public async clearOverrideForToday (): Promise<void> {
+    await this.ensureCacheLoaded()
     const today = Calendar.dateToString(new Date())
     this.cache = this.cache.filter(o => o.date !== today)
     await this.saveCache()
   }
 
   public getOverrideForDate (date: Date): IScheduleOverride | null {
-    if (!this.cacheLoaded) return null
+    if (!this.cacheLoaded) {
+      // Block synchronously if cache isn't loaded yet (shouldn't happen in normal flow)
+      // This is a fallback - the cache should be loaded by the time this is called
+      return null
+    }
     const dateStr = Calendar.dateToString(date)
     return this.cache.find(o => o.date === dateStr) || null
   }
@@ -72,6 +85,11 @@ class ScheduleOverrideManager {
     })
     
     await this.saveCache()
+  }
+
+  // Ensure cache is loaded before using the override manager
+  public async waitForCache(): Promise<void> {
+    await this.ensureCacheLoaded()
   }
 }
 

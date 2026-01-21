@@ -79,4 +79,15 @@ export default class Calendar {
     schedule = schedule.overrideDisplay(display)
     return schedule
   }
+
+  // Get the schedule that would be used without any local overrides. This is used for displaying the default schedule in the settings UI and for deciding whether to show the Unsynced | tag.
+  public getDefaultSchedule (date: Date): Schedule {
+    const {
+      name,
+      display
+    } = this.special[Calendar.dateToString(date)] || this.week[Calendar.dayOfWeek(date)]
+    let schedule = this.schedules[name]
+    schedule = schedule.overrideDisplay(display)
+    return schedule
+  }
 }

@@ -50,8 +50,11 @@ const Settings = {
         .sort((a, b) => a.display.localeCompare(b.display))
       
       // Check if there's an override for today
+      await scheduleOverrideManager.waitForCache()
       const override = scheduleOverrideManager.getTodayOverride()
       vnode.state.currentOverride = override ? override.scheduleName : null
+      // pendingOverride is set when the user changes the selector but hasn't saved
+      vnode.state.pendingOverride = undefined
     } catch (e) {
       vnode.state.availableSchedules = []
     }
@@ -80,8 +83,8 @@ const Settings = {
       m('.settings-section', [
         m('.desc', [
           'School schedule source',
-          m('br'),
-          '(No guarantee of correctness. Check with school for official schedules.)']),
+          m('br'), 
+          m('small'), '(No guarantee of correctness. Check with school for official schedules.)']),
         m(Select, {
           value: (vnode.state.sources) ? sourceManager.source : '',
           options: vnode.state.sources || [''],
@@ -98,24 +101,17 @@ const Settings = {
           m('.desc', [
             'Override Today\'s Schedule (Local Only)',
             m('br'),
-            m('small', 'Temporarily use a different schedule for today only (only on your machine)')
+            m('small', 'If your schedule ')
           ]),
           m(Select, {
-            value: vnode.state.currentOverride || '',
-            options: [{ display: '-- Use Default Schedule --', value: '' }].concat(vnode.state.availableSchedules),
-            onselect: async (scheduleName) => {
-              if (scheduleName) {
-                await scheduleOverrideManager.setOverrideForToday(scheduleName)
-                vnode.state.currentOverride = scheduleName
-              } else {
-                await scheduleOverrideManager.clearOverrideForToday()
-                vnode.state.currentOverride = null
-              }
+            value: (vnode.state.pendingOverride !== undefined) ? vnode.state.pendingOverride : (vnode.state.currentOverride ? vnode.state.currentOverride : '__default__'),
+            options: [{ display: '-- Use Default Schedule --', value: '__default__' }].concat(vnode.state.availableSchedules),
+            onselect: (scheduleName) => {
+              // Don't apply immediately — let the user Save using the done button
+              vnode.state.pendingOverride = scheduleName
               m.redraw()
-              // Reload the page to apply the override
-              window.location.reload()
             }
-          })
+          }),
         ] : null,
         m('.add-link', (vnode.state.editClasses) ? null : m('a.add#edit-classes-button[href=/periods]', {
           oncreate: m.route.link
@@ -165,8 +161,24 @@ const Settings = {
           )),
 
         m('.footer-right[style=position: fixed;]', m('a[href=javascript:void(0);]', {
-          onclick: () => {
-            m.route.set('/')
+          onclick: async () => {
+            try {
+              if (vnode.state.pendingOverride !== undefined) {
+                if (vnode.state.pendingOverride === '__default__') {
+                  await scheduleOverrideManager.clearOverrideForToday()
+                  vnode.state.currentOverride = null
+                } else {
+                  await scheduleOverrideManager.setOverrideForToday(vnode.state.pendingOverride)
+                  vnode.state.currentOverride = vnode.state.pendingOverride
+                }
+                vnode.state.pendingOverride = undefined
+                if (global && global.bellTimer && global.bellTimer.reloadData) {
+                  try { await global.bellTimer.reloadData() } catch (e) { /* ignore */ }
+                }
+              }
+            } finally {
+              m.route.set('/')
+            }
           }
         }, m('i.done-icon.icon.material-icons', 'done'))),
         m('.footer-left[style=position: fixed;]', [m('a[style=margin-right: 2em;]', {
