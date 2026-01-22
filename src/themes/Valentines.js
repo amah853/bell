@@ -37,18 +37,74 @@ function drawHeart(ctx, x, y, size, rotation) {
   ctx.restore()
 }
 
+// Helper function to draw a heart path (reusable for both background and foreground)
+function drawHeartPath(ctx, w, h, yOffset) {
+  ctx.beginPath()
+  ctx.moveTo(0, h * 0.45 + yOffset)
+  ctx.bezierCurveTo(
+    -w * 0.4, h * 0.15 + yOffset,
+    -w, h * 0.05 + yOffset,
+    -w, -h * 0.15 + yOffset
+  )
+  ctx.bezierCurveTo(
+    -w, -h * 0.42 + yOffset,
+    -w * 0.5, -h * 0.5 + yOffset,
+    0, -h * 0.3 + yOffset
+  )
+  ctx.bezierCurveTo(
+    w * 0.5, -h * 0.5 + yOffset,
+    w, -h * 0.42 + yOffset,
+    w, -h * 0.15 + yOffset
+  )
+  ctx.bezierCurveTo(
+    w, h * 0.05 + yOffset,
+    w * 0.4, h * 0.15 + yOffset,
+    0, h * 0.45 + yOffset
+  )
+  ctx.closePath()
+}
+
+function drawHeartCountdown(ctx, x, y, radius, proportion) {
+  const heartWidth = radius * 2
+  const heartHeight = radius * 2
+  const w = heartWidth * 0.5
+  const h = heartHeight * 0.95
+  const yOffset = h * 0.02
+  // ===== DRAW BACKGROUND HEART (so they can see that its supposed to be a heart) =====
+  ctx.save()
+  ctx.translate(x, y)
+  ctx.globalAlpha = 0.5
+  drawHeartPath(ctx, w, h, yOffset)
+  ctx.fill()
+  ctx.restore()
+  // ===== DRAW FOREGROUND HEART (countdown, clipped) =====
+  ctx.save()
+  ctx.beginPath()
+  ctx.arc(x, y, radius * 1.2, (Math.PI / -2), (Math.PI / -2) + (-2 * Math.PI) * (1 - proportion), true)
+  ctx.lineTo(x, y)
+  ctx.closePath()
+  ctx.clip()
+  ctx.globalAlpha = 0.98
+  ctx.fillStyle = 'rgba(255,255,255,0.98)'
+  ctx.translate(x, y)
+  drawHeartPath(ctx, w, h, yOffset)
+  ctx.fill()
+  ctx.restore()
+}
+
 module.exports = {
   name: 'Valentines',
+  drawHeartCountdown: drawHeartCountdown,
   enabled: (secrets) => {
     const now = new Date()
-    return (now.getMonth() + 1) === 2 // February
+    return (now.getMonth() + 1) === 1 // February
   },
   specialEffects: (ctx, canvas) => {
     if (hearts.size < 30 && Math.random() < 0.08) {
       hearts.add({ 
         x: Math.random() * window.innerWidth, 
         y: -20,
-        size: 10 + Math.random() * 15,
+        size: 30 + Math.random() * 30,
         rotation: Math.random() * Math.PI * 2,
         rotationSpeed: (Math.random() - 0.5) * 0.05,
         xSpeed: (Math.random() - 0.5) * 1.5,
