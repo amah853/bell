@@ -97,7 +97,7 @@ module.exports = {
   drawHeartCountdown: drawHeartCountdown,
   enabled: (secrets) => {
     const now = new Date()
-    return (now.getMonth() + 1) === 1 // February
+    return (now.getMonth() + 1) === 2 // February
   },
   specialEffects: (ctx, canvas) => {
     if (hearts.size < 30 && Math.random() < 0.08) {
