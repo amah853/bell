@@ -123,21 +123,17 @@ module.exports = {
       // Calculate pulse scale (subtle pulse between 0.9 and 1.1)
       const pulseScale = 1 + Math.sin(heart.pulsePhase) * 0.3
       const currentSize = heart.clicked ? heart.size * 1.5 : heart.size
-      
       drawHeart(ctx, heart.x, heart.y, currentSize * pulseScale, heart.rotation)
       ctx.fill()
-      
       if (heart.y > window.innerHeight + 50) {
         hearts.delete(heart)
       }
-      
       heart.y += heart.ySpeed
       heart.x += heart.xSpeed
       heart.rotation += heart.rotationSpeed
       heart.pulsePhase += 0.05
     }
     ctx.globalAlpha = 1.0
-    
     canvas.addEventListener('mousedown', (e) => {
       for (const heart of hearts) {
         const distance = Math.sqrt(Math.pow(heart.x - e.x, 2) + Math.pow(heart.y - e.y, 2))
