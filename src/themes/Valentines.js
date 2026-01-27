@@ -4,7 +4,7 @@ const BasicTiming = require('./timings/BasicTiming')
 
 const hearts = new Set()
 
-function drawHeart(ctx, x, y, size, rotation) {
+function drawHeart (ctx, x, y, size, rotation) {
   ctx.save()
   ctx.translate(x, y)
   ctx.rotate(rotation)
@@ -38,7 +38,7 @@ function drawHeart(ctx, x, y, size, rotation) {
 }
 
 // Helper function to draw a heart path (reusable for both background and foreground)
-function drawHeartPath(ctx, w, h, yOffset) {
+function drawHeartPath (ctx, w, h, yOffset) {
   ctx.beginPath()
   ctx.moveTo(0, h * 0.45 + yOffset)
   ctx.bezierCurveTo(
@@ -64,7 +64,7 @@ function drawHeartPath(ctx, w, h, yOffset) {
   ctx.closePath()
 }
 
-function drawHeartCountdown(ctx, x, y, radius, proportion) {
+function drawHeartCountdown (ctx, x, y, radius, proportion) {
   const heartWidth = radius * 2
   const heartHeight = radius * 2
   const w = heartWidth * 0.5
@@ -101,8 +101,8 @@ module.exports = {
   },
   specialEffects: (ctx, canvas) => {
     if (hearts.size < 30 && Math.random() < 0.08) {
-      hearts.add({ 
-        x: Math.random() * window.innerWidth, 
+      hearts.add({
+        x: Math.random() * window.innerWidth,
         y: -20,
         size: 30 + Math.random() * 30,
         rotation: Math.random() * Math.PI * 2,
@@ -115,11 +115,11 @@ module.exports = {
         pulsePhase: Math.random() * Math.PI * 2
       })
     }
-    
+
     for (const heart of hearts) {
       ctx.globalAlpha = heart.opacity
       ctx.fillStyle = heart.clicked ? '#ffffff' : heart.color
-      
+
       // Calculate pulse scale (subtle pulse between 0.9 and 1.1)
       const pulseScale = 1 + Math.sin(heart.pulsePhase) * 0.3
       const currentSize = heart.clicked ? heart.size * 1.5 : heart.size
@@ -134,7 +134,7 @@ module.exports = {
       heart.pulsePhase += 0.05
     }
     ctx.globalAlpha = 1.0
-    canvas.addEventListener('mousedown', (e) => {
+    canvas.addEventListener('mousedown', function (e) {
       for (const heart of hearts) {
         const distance = Math.sqrt(Math.pow(heart.x - e.x, 2) + Math.pow(heart.y - e.y, 2))
         if (distance < heart.size) {
