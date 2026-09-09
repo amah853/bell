@@ -4,7 +4,8 @@ const fs = Promise.promisifyAll(require('fs'))
 const path = require('path')
 const cache = require('./cache')
 
-const dataDir = path.join(__dirname, '..', 'schedules')
+const schedulesRepositoryURL = 'https://raw.githubusercontent.com/amah853/schedules/master'
+const editorScheduleProxyURL = 'https://iosbell-api.ahmadmahrous853.workers.dev/config/schedule-source'
 
 /**
  * Make sure people aren't trying anything funny
@@ -22,13 +23,33 @@ const getLocalData = async function (source, file) {
   return getLocalDataUnvalidated(source, file)
 }
 
+const getRepositoryData = async function (source, file) {
+  if ((source && !validateSource(source)) || !file.match(/^[a-zA-Z0-9._-]+$/)) {
+    throw new Error('Invalid schedules repository path')
+  }
+
+  const response = await request.getAsync({
+    url: `${schedulesRepositoryURL}/${source ? `${source}/` : ''}${file}`,
+    headers: {
+      'Cache-Control': 'no-cache',
+      Pragma: 'no-cache'
+    }
+  })
+  if (response.statusCode !== 200) {
+    throw new Error(response.statusCode === 404 ? 'Not found' : 'Invalid status code')
+  }
+  return response.body
+}
+
 const getLocalDataUnvalidated = async function (source, file) {
-  const data = await fs.readFileAsync(path.join(dataDir, source, file))
-  return data.toString()
+  return getRepositoryData(source, file)
 }
 
 const getWebData = async function (source, file, url) {
   if (!validateSource(source)) { throw new Error('Source contains invalid characters') }
+  if (url === 'https://edit.bell.plus/api/data/schools') {
+    url = editorScheduleProxyURL
+  }
   const path = file == null ? `${url}/${source}` : `${url}/${source}/${file.split('.')[0]}`
   const response = await request.getAsync(path)
   if (response.statusCode === 404) {
@@ -92,7 +113,7 @@ const getMessage = async function (source) {
   try {
     return JSON.parse(await fetch(source, 'message.json'))
   } catch (e) {
-    return JSON.parse(await fs.readFileAsync(path.join(dataDir, 'message.json')))
+    return JSON.parse(await getLocalDataUnvalidated('', 'message.json'))
   }
 }
 const getVersion = cache(async function () {

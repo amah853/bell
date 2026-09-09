@@ -1,7 +1,6 @@
 const express = require('express')
 const router = express.Router()
 const data = require('../data')
-const Cache = require('../cache2')
 
 router.get('/:source/meta', async (req, res) => {
   try {
@@ -46,12 +45,12 @@ router.get('/:source/message', async (req, res) => {
   }
 })
 
-const sourceCache = new Cache(10 * 60)
-const getAllCached = sourceCache.cached(key => data.getAll(key))
-
 router.get('/:source', async (req, res) => {
   try {
-    const all = await getAllCached(req.params.source)
+    // Web-backed schools are edited live at edit.bell.plus. Do not retain an
+    // application-level snapshot after an editor publishes a schedule change.
+    res.set('Cache-Control', 'no-store')
+    const all = await data.getAll(req.params.source)
     res.json(all)
   } catch (e) {
     res.status(404).send('Not found')
@@ -59,13 +58,7 @@ router.get('/:source', async (req, res) => {
 })
 
 router.get('/:source/invalidate', async (req, res) => {
-  try {
-    sourceCache.invalidate(req.params.source)
-    res.status(200).send('OK')
-  } catch (e) {
-    console.error(e)
-    res.status(404).send('Not found')
-  }
+  res.status(200).send('OK')
 })
 
 module.exports = router

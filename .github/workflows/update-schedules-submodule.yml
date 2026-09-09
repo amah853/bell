@@ -21,6 +21,9 @@ jobs:
       - name: Update schedules to latest master
         run: git submodule update --remote schedules
 
+      - name: Refresh deployed school directory
+        run: node scripts/generate-school-ids.js
+
       - name: Commit updated schedules pointer
         run: |
           if git diff --quiet -- schedules; then
@@ -30,6 +33,6 @@ jobs:
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add schedules
+          git add schedules server/school-ids.json
           git commit -m "Update schedules submodule"
           git push

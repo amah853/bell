@@ -1,35 +1,34 @@
-const Promise = require('bluebird')
 const express = require('express')
 const router = express.Router()
-const fs = Promise.promisifyAll(require('fs'))
-const path = require('path')
 const data = require('../data')
-
-const schoolsDir = path.join(__dirname, '..', '..', 'schedules')
+const deployedSchoolIDs = require('../school-ids.json')
 
 /**
  * Get the names of the supported schools
  * @return {Array<string>} short names (IDs) of schools
  */
 const dataDirectories = async () => {
-  const contents = await fs.readdirAsync(schoolsDir)
-  return contents.filter(name =>
-    fs.lstatSync(path.join(schoolsDir, name)).isDirectory())
+  return deployedSchoolIDs
 }
 
 router.get('/', async (req, res) => {
-  const directories = await dataDirectories()
-  const sources = await Promise.all(directories.map(async directory => {
-    if (directory.startsWith('_')) return null
-    try {
-      const source = await data.getMeta(directory)
-      source.id = directory
-      return source
-    } catch (e) {
-      return null
-    }
-  }))
-  res.json(sources.filter(x => x))
+  res.set('Cache-Control', 'no-store')
+  try {
+    const directories = await dataDirectories()
+    const sources = await Promise.all(directories.map(async directory => {
+      if (directory.startsWith('_')) return null
+      try {
+        const source = await data.getMeta(directory)
+        source.id = directory
+        return source
+      } catch (e) {
+        return null
+      }
+    }))
+    res.json(sources.filter(x => x))
+  } catch (e) {
+    res.status(503).json({ error: 'School directory is temporarily unavailable' })
+  }
 })
 
 router.get('/names', async (req, res) => {

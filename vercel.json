@@ -4,12 +4,7 @@
   "builds": [
     {
       "src": "api/index.js",
-      "use": "@vercel/node",
-      "config": {
-        "includeFiles": [
-          "schedules/**"
-        ]
-      }
+      "use": "@vercel/node"
     },
     {
       "src": "package.json",

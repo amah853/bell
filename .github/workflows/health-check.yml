@@ -2,55 +2,50 @@ name: Health Check
 
 on:
   schedule:
-    - cron: '*/15 * * * *'
+    - cron: '17 * * * *'
   workflow_dispatch:
 
 jobs:
   health-check:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-latest
     steps:
-      - name: Check https://bell.plus
-        id: check-bell
+      - name: Check Bell API and complete school directory
+        id: check-bell-api
         run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://bell.plus)
-          echo "status=$STATUS" >> $GITHUB_OUTPUT
-          if [ "$STATUS" != "200" ]; then
-            echo "bell.plus returned $STATUS"
-            exit 1
-          fi
+          curl --fail --show-error --silent https://bellapi.vercel.app/api/version > /dev/null
+          curl --fail --show-error --silent https://bellapi.vercel.app/api/sources \
+            | jq --exit-status 'map(.id) | index("188535") != null and index("gbms") != null' > /dev/null
+          curl --fail --show-error --silent https://bellapi.vercel.app/api/data/188535 \
+            | jq --exit-status '.meta.name and .calendar and .schedules' > /dev/null
         continue-on-error: true
 
-      - name: Check https://edit.bell.plus
+      - name: Check live editor schedule proxy
         id: check-edit
         run: |
-          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://edit.bell.plus)
-          echo "status=$STATUS" >> $GITHUB_OUTPUT
-          if [ "$STATUS" != "200" ]; then
-            echo "edit.bell.plus returned $STATUS"
-            exit 1
-          fi
+          curl --fail --show-error --silent https://iosbell-api.ahmadmahrous853.workers.dev/config/schedule-source/188535 \
+            | jq --exit-status '.meta.name and .calendar and .schedules' > /dev/null
         continue-on-error: true
 
-      - name: Send notification if bell.plus is down
-        if: steps.check-bell.outcome == 'failure'
+      - name: Send notification if Bell API is unhealthy
+        if: steps.check-bell-api.outcome == 'failure'
         run: |
           curl -X POST \
-            -H "Title: bell.plus is down" \
+            -H "Title: Bell API is unhealthy" \
             -H "Priority: high" \
             -H "Tags: warning" \
-            -d "bell.plus returned HTTP ${{ steps.check-bell.outputs.status }}" \
+            -d "The school directory or live schedule proxy failed its health check." \
             https://ntfy.sh/nicolaschan_alerts
 
-      - name: Send notification if edit.bell.plus is down
+      - name: Send notification if editor school API is unhealthy
         if: steps.check-edit.outcome == 'failure'
         run: |
           curl -X POST \
-            -H "Title: edit.bell.plus is down" \
+            -H "Title: Bell editor schedule proxy is unhealthy" \
             -H "Priority: high" \
             -H "Tags: warning" \
-            -d "edit.bell.plus returned HTTP ${{ steps.check-edit.outputs.status }}" \
+            -d "The public editor schedule proxy failed its health check." \
             https://ntfy.sh/nicolaschan_alerts
 
       - name: Fail workflow if any check failed
-        if: steps.check-bell.outcome == 'failure' || steps.check-edit.outcome == 'failure'
+        if: steps.check-bell-api.outcome == 'failure' || steps.check-edit.outcome == 'failure'
         run: exit 1
